@@ -1,10 +1,10 @@
 use std::fs;
 
-use pest::{Parser, iterators::Pair, iterators::Pairs, Span};
+use pest::{Parser, iterators::Pair};
 use pest_derive::Parser;
 
 #[derive(Parser)]
-#[grammar = "grammar.pest"]
+#[grammar = "grammar/njar.pest"]
 pub struct Grammar;
 
 use pest::pratt_parser::PrattParser;
