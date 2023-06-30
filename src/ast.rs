@@ -10,11 +10,13 @@ pub struct Module {
 #[derive(Debug)]
 pub enum Stmt {
     Expr(Expr),
-    FunDecl,
+    FunDecl{name: String},
+    VarDecl{name: String, value: Expr},
 }
 
 #[derive(Debug)]
 pub enum Expr {
+    VarCall{name: String},
     FunCall{name: String, args: Vec<Expr>},
     Integer(i64),
     String(String),

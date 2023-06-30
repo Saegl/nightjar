@@ -23,7 +23,12 @@ fn main() {
             code_obj::dis(&co);
         }
         
-        let vm = vm::VM {};
+        let mut vm = vm::VM::new();
         vm.run(co);
+
+        if verbose {
+            println!("VM final state");
+            vm.print_state();
+        }
     }
 }

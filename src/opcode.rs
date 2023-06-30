@@ -3,9 +3,12 @@
 #[allow(non_camel_case_types)]
 pub enum OpCode {
     // Stack Manipulation
-    push,
+    push_const,
+    push_var,
     pop,
     copy,
+
+    store_var,
 
     // Debug
     print,
@@ -33,9 +36,5 @@ pub enum OpCode {
 impl OpCode {
     pub fn from_u8(val: u8) -> Self {
         unsafe { std::mem::transmute(val)}
-    }
-    pub fn has_oparg(&self) -> bool {
-        let opcodes_with_oparg = vec![OpCode::push];
-        opcodes_with_oparg.contains(self)
     }
 }

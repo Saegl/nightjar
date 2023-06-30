@@ -39,7 +39,7 @@ fn parse_expr(pair: Pair<Rule>) -> ast::Expr {
         .map_primary(|primary| match primary.as_rule() {
             Rule::fun_call => parse_fun_call(primary),
             Rule::type_init => unimplemented!(),
-            Rule::var_call => unimplemented!(),
+            Rule::var_call => ast::Expr::VarCall{name: primary.as_str().to_string()},
             Rule::integer => ast::Expr::Integer(primary.as_str().trim().parse().unwrap()),
             Rule::float => unimplemented!(),
             Rule::string => ast::Expr::String(primary.as_str().strip_prefix("\"").unwrap().strip_suffix("\"").unwrap().to_string()),
@@ -109,10 +109,30 @@ fn parse_arglist(pair: Pair<Rule>) -> Vec<ast::Expr> {
 
 fn parse_stmt(pair: Pair<Rule>) -> ast::Stmt {
     match pair.as_rule() {
-        // Rule::fun_decl => parse_fun_decl(stmt),
         Rule::expr => ast::Stmt::Expr(parse_expr(pair)),
+        Rule::fun_decl => parse_fun_decl(pair),
+        Rule::var_decl => parse_var_decl(pair),
         _ => unimplemented!(),
     }
+}
+
+fn parse_fun_decl(pair: Pair<Rule>) -> ast::Stmt {
+    assert_eq!(pair.as_rule(), Rule::fun_decl);
+    let mut rules = pair.into_inner();
+    let ident = rules.next().unwrap();
+
+    assert_eq!(rules.next(), None);
+
+    ast::Stmt::FunDecl{name: "sorry".to_string()}
+}
+
+fn parse_var_decl(pair: Pair<Rule>) -> ast::Stmt {
+    assert_eq!(pair.as_rule(), Rule::var_decl);
+    let mut rules = pair.into_inner();
+    let ident = rules.next().unwrap().as_str().to_string();
+    let expr = parse_expr(rules.next().unwrap());
+    assert_eq!(rules.next(), None);
+    ast::Stmt::VarDecl{name: ident, value: expr}
 }
 
 fn parse_stmts(pair: Pair<Rule>) -> Vec<ast::Stmt> {

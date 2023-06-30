@@ -56,12 +56,6 @@ impl Value {
         let b = other.as_int();
         Value::Integer((a <= b) as i64)
     }
-    pub fn as_usize(self) -> usize {
-        match self {
-            Value::Integer(v) => v as usize,
-            _ => panic!("Expected integer"),
-        }
-    }
     pub fn as_bool(self) -> bool {
         match self {
             Value::Integer(v) => v > 0,

@@ -1,94 +1,126 @@
 use crate::code_obj::CodeObject;
 use crate::value::Value;
 use crate::opcode::OpCode;
+use crate::opcode::OpCode::*;
 
-pub struct VM {}
+pub struct VM {
+    pc: usize,
+    stack: Vec<Value>,
+    vars: Vec<Value>,
+}
 
 impl VM {
-    pub fn run(&self, co: CodeObject) {
-        let mut pc = 0;
-        let mut stack: Vec<Value> = vec![];
-        
+    pub fn new() -> Self {
+        VM {
+            pc: 0,
+            stack: vec![],
+            vars: vec![],
+        }
+    }
+    pub fn print_state(&self) {
+        println!("PC: {}", self.pc);
+        println!("stack: {:?}", self.stack);
+        println!("vars: {:?}", self.vars);
+    }
+    pub fn run(&mut self, co: CodeObject) {        
         loop {
-            let opcode = OpCode::from_u8(co.code[pc]);
-            pc += 1;
+            let opcode = OpCode::from_u8(co.code[self.pc]);
+            // println!("OPCODE PC {}", pc);
+            self.pc += 1;
 
             match opcode {
-                OpCode::push => {
-                    let const_index = co.code[pc];
-                    pc += 1;
-                    stack.push(co.consts[const_index as usize].clone());
+                push_const => {
+                    let const_index = co.code[self.pc] as usize;
+                    self.pc += 1;
+                    self.stack.push(co.consts[const_index].clone());
                 }
-                OpCode::pop => {
-                    stack.pop().unwrap();
-                },
-                OpCode::copy => {
-                    stack.push(stack[stack.len() - 1].clone());
+                push_var => {
+                    let var_index = co.code[self.pc] as usize;
+                    self.pc += 1;
+                    self.stack.push(self.vars[var_index].clone());
                 }
-                OpCode::print => {
-                    println!("{:?}", stack.pop().unwrap());
+                pop => {
+                    self.stack.pop().unwrap();
                 },
-                OpCode::jmp_nonzero => {
-                    let top = stack[stack.len() - 1].clone();
-                    if top.__ne__(Value::Integer(0)).as_bool() {
-                        let jump_position = co.code[pc];
-                        pc = jump_position as usize;
+                copy => {
+                    self.stack.push(self.stack[self.stack.len() - 1].clone());
+                }
+                store_var => {
+                    let var_index = co.code[self.pc] as usize;
+                    self.pc += 1;
+                    let topval = self.stack.pop().unwrap();
+                    if var_index == self.vars.len() {
+                        self.vars.push(topval);
+                    } else if var_index < self.vars.len() {
+                        self.vars[var_index] = topval;
                     } else {
-                        pc += 1;
+                        panic!("Bad bytecode")
                     }
                 }
-                OpCode::halt => {
+                print => {
+                    println!("{:?}", self.stack.pop().unwrap());
+                },
+                jmp_nonzero => {
+                    let top = self.stack[self.stack.len() - 1].clone();
+                    if top.__ne__(Value::Integer(0)).as_bool() {
+                        let jump_position = co.code[self.pc];
+                        self.pc = jump_position as usize;
+                    } else {
+                        self.pc += 1;
+                    }
+                }
+                halt => {
                     break;
                 },
-                OpCode::add => {
-                    let b = stack.pop().unwrap();
-                    let a = stack.pop().unwrap();
-                    stack.push(a.__add__(b));
+                add => {
+                    let b = self.stack.pop().unwrap();
+                    let a = self.stack.pop().unwrap();
+                    self.stack.push(a.__add__(b));
                 },
-                OpCode::sub => {
-                    let b = stack.pop().unwrap();
-                    let a = stack.pop().unwrap();
-                    stack.push(a.__sub__(b));
+                sub => {
+                    let b = self.stack.pop().unwrap();
+                    let a = self.stack.pop().unwrap();
+                    self.stack.push(a.__sub__(b));
                 },
-                OpCode::mul => {
-                    let b = stack.pop().unwrap();
-                    let a = stack.pop().unwrap();
-                    stack.push(a.__mul__(b));
+                mul => {
+                    let b = self.stack.pop().unwrap();
+                    let a = self.stack.pop().unwrap();
+                    self.stack.push(a.__mul__(b));
                 },
-                OpCode::div => {
-                    let b = stack.pop().unwrap();
-                    let a = stack.pop().unwrap();
-                    stack.push(a.__div__(b));
+                div => {
+                    let b = self.stack.pop().unwrap();
+                    let a = self.stack.pop().unwrap();
+                    self.stack.push(a.__div__(b));
                 },
-                OpCode::gt => {
-                    let b = stack.pop().unwrap();
-                    let a = stack.pop().unwrap();
-                    stack.push(a.__gt__(b));
+                gt => {
+                    let b = self.stack.pop().unwrap();
+                    let a = self.stack.pop().unwrap();
+                    self.stack.push(a.__gt__(b));
                 },
-                OpCode::lt => {
-                    let b = stack.pop().unwrap();
-                    let a = stack.pop().unwrap();
-                    stack.push(a.__lt__(b));
+                lt => {
+                    let b = self.stack.pop().unwrap();
+                    let a = self.stack.pop().unwrap();
+                    self.stack.push(a.__lt__(b));
                 },
-                OpCode::et => {
-                    let b = stack.pop().unwrap();
-                    let a = stack.pop().unwrap();
-                    stack.push(a.__et__(b));
+                et => {
+                    let b = self.stack.pop().unwrap();
+                    let a = self.stack.pop().unwrap();
+                    self.stack.push(a.__et__(b));
                 },
-                OpCode::ne => {
-                    let b = stack.pop().unwrap();
-                    let a = stack.pop().unwrap();
-                    stack.push(a.__ne__(b));
+                ne => {
+                    let b = self.stack.pop().unwrap();
+                    let a = self.stack.pop().unwrap();
+                    self.stack.push(a.__ne__(b));
                 },
-                OpCode::ge => {
-                    let b = stack.pop().unwrap();
-                    let a = stack.pop().unwrap();
-                    stack.push(a.__ge__(b));
+                ge => {
+                    let b = self.stack.pop().unwrap();
+                    let a = self.stack.pop().unwrap();
+                    self.stack.push(a.__ge__(b));
                 },
-                OpCode::le => {
-                    let b = stack.pop().unwrap();
-                    let a = stack.pop().unwrap();
-                    stack.push(a.__le__(b));
+                le => {
+                    let b = self.stack.pop().unwrap();
+                    let a = self.stack.pop().unwrap();
+                    self.stack.push(a.__le__(b));
                 },
             }
         }

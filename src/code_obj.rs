@@ -7,20 +7,32 @@ pub struct CodeObject {
     pub consts: Vec<Value>,
 }
 
+impl CodeObject {
+    pub fn new_empty() -> Self {
+        CodeObject { code: vec![], consts: vec![] }
+    }
+}
+
 
 pub fn dis(co: &CodeObject) {
     println!("Disassembler:");
 
-    let mut is_oparg = false;
+    let mut prev = OpCode::halt;
     for (ind, code) in co.code.iter().enumerate() {
-        if is_oparg {
+        if prev == OpCode::push_const {
             let value = &co.consts[*code as usize];
-            println!("{}: <oparg [{}] = {:?}>", ind, *code, value);
-            is_oparg = false;
+            println!("{}: <const {:?} at {}>", ind, value, code);
+            prev = OpCode::halt
+        } else if prev == OpCode::push_var {
+            println!("{}: <const at {}>", ind, code);
+            prev = OpCode::halt
+        } else if prev == OpCode::store_var {
+            println!("{}: <pos {}>", ind, code);
+            prev = OpCode::halt
         } else {
             let opcode = OpCode::from_u8(*code);
             println!("{}: {:?}", ind, opcode);
-            is_oparg = opcode.has_oparg();
+            prev = opcode
         }
     }
 
