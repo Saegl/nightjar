@@ -188,8 +188,8 @@ fn parse_module(pair: Pair<Rule>) -> ast::Module {
 }
 
 
-pub fn parse_file() -> ast::Module {
-    let source = fs::read_to_string("examples/hello.njar").unwrap();
+pub fn parse_file(path: &str) -> ast::Module {
+    let source = fs::read_to_string(path).unwrap();
     let parse_tree = Grammar::parse(Rule::module, &source).unwrap().next().unwrap();
     let ast = parse_module(parse_tree);
     println!("{:#?}", ast);

@@ -1,7 +1,7 @@
 #[derive(Debug, Clone)]
 pub enum Value {
     Integer(i64),
-    String(String),
+    String(Box<String>),
     Float(f64),
 }
 
@@ -73,5 +73,15 @@ impl Value {
             Value::Integer(v) => v,
             _ => panic!("Expected integer"),
         }
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn value_size() {
+        assert_eq!(std::mem::size_of::<Value>() * 8, 128);
     }
 }
