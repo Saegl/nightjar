@@ -14,7 +14,9 @@ pub enum OpCode {
     print,
     
     // Control flow
+    jmp,
     jmp_nonzero,
+    pop_jmp_ifzero,
     halt,
 
     // Math operations

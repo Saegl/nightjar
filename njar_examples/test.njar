@@ -1,0 +1,8 @@
+let x = 6
+if x > 5 {
+    print("BIG")
+} else {
+    print("SMAL")
+}
+
+print("ALWAYS")

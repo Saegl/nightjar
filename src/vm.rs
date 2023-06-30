@@ -58,11 +58,24 @@ impl VM {
                     }
                 }
                 print => {
-                    println!("{:?}", self.stack.pop().unwrap());
+                    println!("{}", self.stack.pop().unwrap().__repr__());
                 },
+                jmp => {
+                    let jmp_pos = co.code[self.pc] as usize;
+                    self.pc = jmp_pos;
+                }
                 jmp_nonzero => {
                     let top = self.stack[self.stack.len() - 1].clone();
                     if top.__ne__(Value::Integer(0)).as_bool() {
+                        let jump_position = co.code[self.pc];
+                        self.pc = jump_position as usize;
+                    } else {
+                        self.pc += 1;
+                    }
+                }
+                pop_jmp_ifzero => {
+                    let top = self.stack.pop().unwrap();
+                    if top.__et__(Value::Integer(0)).as_bool() {
                         let jump_position = co.code[self.pc];
                         self.pc = jump_position as usize;
                     } else {

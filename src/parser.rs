@@ -112,18 +112,47 @@ fn parse_stmt(pair: Pair<Rule>) -> ast::Stmt {
         Rule::expr => ast::Stmt::Expr(parse_expr(pair)),
         Rule::fun_decl => parse_fun_decl(pair),
         Rule::var_decl => parse_var_decl(pair),
+        Rule::if_stmt => parse_if_stmt(pair),
         _ => unimplemented!(),
     }
+}
+
+fn parse_if_stmt(pair: Pair<Rule>) -> ast::Stmt {
+    assert_eq!(pair.as_rule(), Rule::if_stmt);
+    let mut rules = pair.into_inner();
+    let test = rules.next().unwrap();
+    let block = rules.next().unwrap();
+
+    let else_body = if let Some(else_stmt) = rules.next() {
+        assert_eq!(else_stmt.as_rule(), Rule::else_stmt);
+        Some(parse_block(else_stmt.into_inner().next().unwrap()))
+    } else {
+        None
+    };
+
+    assert_eq!(rules.next(), None);
+
+    ast::Stmt::If(
+        ast::IfStmt {
+            if_test: parse_expr(test),
+            if_body: parse_block(block),
+            else_body
+        }
+    )
+}
+
+fn parse_block(pair: Pair<Rule>) -> Vec<ast::Stmt> {
+    pair.into_inner().map(parse_stmt).collect()
 }
 
 fn parse_fun_decl(pair: Pair<Rule>) -> ast::Stmt {
     assert_eq!(pair.as_rule(), Rule::fun_decl);
     let mut rules = pair.into_inner();
-    let ident = rules.next().unwrap();
+    let ident = rules.next().unwrap().to_string();
 
     assert_eq!(rules.next(), None);
 
-    ast::Stmt::FunDecl{name: "sorry".to_string()}
+    ast::Stmt::FunDecl{name: ident}
 }
 
 fn parse_var_decl(pair: Pair<Rule>) -> ast::Stmt {

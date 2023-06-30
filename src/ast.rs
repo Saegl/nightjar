@@ -12,6 +12,14 @@ pub enum Stmt {
     Expr(Expr),
     FunDecl{name: String},
     VarDecl{name: String, value: Expr},
+    If(IfStmt),
+}
+
+#[derive(Debug)]
+pub struct IfStmt {
+    pub if_test: Expr,
+    pub if_body: Vec<Stmt>,
+    pub else_body: Option<Vec<Stmt>>,
 }
 
 #[derive(Debug)]

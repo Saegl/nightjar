@@ -56,6 +56,13 @@ impl Value {
         let b = other.as_int();
         Value::Integer((a <= b) as i64)
     }
+    pub fn __repr__(&self) -> String {
+        match self {
+            Value::Integer(x) => format!("{}", x),
+            Value::Float(f) => format!("{}", f),
+            Value::String(s) => *s.clone(),
+        }
+    }
     pub fn as_bool(self) -> bool {
         match self {
             Value::Integer(v) => v > 0,

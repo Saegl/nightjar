@@ -29,6 +29,12 @@ pub fn dis(co: &CodeObject) {
         } else if prev == OpCode::store_var {
             println!("{}: <pos {}>", ind, code);
             prev = OpCode::halt
+        } else if prev == OpCode::jmp {
+            println!("{}: <jmp pos {}>", ind, code);
+            prev = OpCode::halt
+        } else if prev == OpCode::pop_jmp_ifzero {
+            println!("{}: <jmp pos {}>", ind, code);
+            prev = OpCode::halt
         } else {
             let opcode = OpCode::from_u8(*code);
             println!("{}: {:?}", ind, opcode);

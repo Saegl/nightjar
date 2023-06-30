@@ -36,6 +36,8 @@ impl CompilerState {
     }
 }
 
+const OVERRIDE_LATER: u8 = 111;
+
 
 pub fn compile_module(module: &ast::Module) -> CodeObject {
     let mut cs = CompilerState::new_empty();
@@ -52,7 +54,34 @@ fn compile_stmt(cs: &mut CompilerState, stmt: &ast::Stmt) {
     match stmt {
         ast::Stmt::Expr(expr) => compile_expr(cs, expr),
         ast::Stmt::VarDecl { name, value } => compile_vardecl(cs, name, value),
+        ast::Stmt::If(if_stmt) => compile_if(cs, if_stmt),
         _ => unimplemented!(),
+    }
+}
+
+fn compile_if(cs: &mut CompilerState, if_stmt: &ast::IfStmt) {
+    compile_expr(cs, &if_stmt.if_test);
+    cs.co.code.push(OpCode::pop_jmp_ifzero as u8);
+    let if_false_jmp_pos = cs.co.code.len();
+    cs.co.code.push(OVERRIDE_LATER);
+
+    for stmt in if_stmt.if_body.iter() {
+        compile_stmt(cs, stmt);
+    }
+
+    cs.co.code[if_false_jmp_pos] = cs.co.code.len() as u8;
+
+    if let Some(else_body_block) = &if_stmt.else_body {
+        cs.co.code.push(OpCode::jmp as u8);
+        let jmp_pos = cs.co.code.len();
+        cs.co.code.push(OVERRIDE_LATER);
+        cs.co.code[if_false_jmp_pos] = cs.co.code.len() as u8;
+
+        for stmt in else_body_block.iter() {
+            compile_stmt(cs, stmt);
+        }
+
+        cs.co.code[jmp_pos] = cs.co.code.len() as u8;
     }
 }
 
