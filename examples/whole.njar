@@ -1,0 +1,48 @@
+print("Hello, World!")
+
+
+fun factorial(x: int): int {
+    if x == 0 {
+        return 1
+    } else {
+        return x * factorial(x - 1)
+    }
+}
+
+print(factorial(5))
+
+
+let i = 0
+while i < 5 {
+    print(i)
+    i = i + 1
+}
+
+
+for i in range(5) {
+    print(i)
+}
+
+let a = 5
+
+if a > 0 {
+    print("Positive")
+} elif a < 0 {
+    print("Negative")
+} else {
+    print("Zero")
+}
+
+# With type annotation
+let x: int = 5
+
+
+struct Person {
+    name: string,
+    age: int,
+}
+
+let person = Person {
+    name: "Joe",
+    age: 22,
+}

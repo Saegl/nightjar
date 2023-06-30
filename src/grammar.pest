@@ -1,0 +1,98 @@
+// Grammar rules
+module = { SOI ~ stmts ~ EOI }
+
+stmts = { stmt* }
+stmt = _{ fun_decl | var_decl | while_loop | for_loop | if_stmt | struct_decl | enum_decl | assign_stmt | expr }
+
+fun_decl = { "fun" ~ ident ~ "(" ~ param_list ~ ")" ~ ":" ~ type ~ block }
+var_decl = { "let" ~ ident ~ (":" ~ type)? ~ "=" ~ expr }
+assign_stmt = { ident ~ "=" ~ expr }
+
+while_loop = { "while" ~ expr ~ block }
+for_loop = { "for" ~ ident ~ "in" ~ expr ~ block }
+
+if_stmt = { "if" ~ expr ~ block ~ (elif_stmt)* ~ (else_stmt)? }
+elif_stmt = { "elif" ~ expr ~ block }
+else_stmt = { "else" ~ block }
+
+struct_decl = { "struct" ~ ident ~ "{" ~ field_list ~ "}" }
+enum_decl = { "enum" ~ ident ~ "{" ~ variant_list ~ "}" }
+
+
+expr = { atom ~ (bin_op ~ atom)* }
+bin_op = _{ exp | mul | matmul | div | rem | add | sub | lshift | rshift | bit_and | bit_xor | bit_or | in_ | not_in | eq | ne | le | ge | lt | gt | and | or }
+	exp = { "**" }
+
+	mul = { "*" }
+	matmul = { "@" }
+	div = { "/" }
+	rem = { "%" }
+
+	add = { "+" }
+    sub = { "-" }
+
+	lshift = { "<<" }
+	rshift = { ">>" }
+
+	bit_and = { "&" }
+
+	bit_xor = { "^" }
+
+	bit_or = { "|" }
+
+	in_ = {"in"}
+	not_in = {"not in"}
+	eq = { "==" }
+    ne = { "!=" }
+    le = { "<=" }
+    ge = { ">=" }
+    lt = { "<" }
+    gt = { ">" }
+
+    and = { "and" }
+	or = { "or" }
+
+
+atom = _{ unary_op? ~ primary }
+unary_op = _{ negative | bit_not | not }
+	negative = { "-" }
+	bit_not = { "~" }
+    
+	not = { "not" }
+
+primary = _{ fun_call | type_init | var_call | integer | float | string | grouping}
+	fun_call = { ident ~ "(" ~ arg_list ~ ")" }
+    type_init = { dotted_ident ~ "{" ~ field_arg_list ~ "}" }
+	var_call = { dotted_ident }
+	integer = { digit+ }
+	float = { digit+ ~ "." ~ digit+ }
+	string = { "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+	grouping = _{ "(" ~ expr ~ ")" }
+
+
+// utils
+ident = @{ alpha ~ (alnum | "_")* }
+dotted_ident = @{ ident ~ ("." ~ ident)* }
+
+arg_list = { (expr ~ ("," ~ expr)* ~ ","?)? }
+param_list = { (typed_ident ~ ("," ~ typed_ident)* ~ ","?)? }
+field_list = { (typed_ident ~ ("," ~ typed_ident)* ~ ","?)? }
+field_arg_list = { (field_arg ~ ("," ~ field_arg)* ~ ","?)? }
+variant_list = { (variant ~ ("," ~ variant)* ~ ","?)? }
+
+typed_ident = { ident ~ ":" ~ type }
+field_arg = { ident ~ ":" ~ expr }
+variant = { ident ~ ("(" ~ param_list ~ ")")? }
+type = { ident }
+block = { "{" ~ stmt* ~ "}" }
+
+
+// ASCII definitions
+alpha = _{ 'a'..'z' | 'A'..'Z' }
+alnum = _{ alpha | digit }
+digit = _{ '0'..'9' }
+
+
+// Ignorable patterns
+WHITESPACE = _{ " " | "\t" | "\n" | "\r\n" }
+COMMENT = _{ "#" ~ (!"\n" ~ ANY)* }
