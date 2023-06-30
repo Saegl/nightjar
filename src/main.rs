@@ -4,6 +4,7 @@ mod compiler;
 mod code_obj;
 mod value;
 mod opcode;
+pub mod ast;
 
 
 fn main() {
@@ -12,8 +13,16 @@ fn main() {
         println!("Provide file to execute")
     } else {
         let file_path = &args[1];
+        let verbose = args.contains(&"--verbose".to_string());
+
         let ast = parser::parse_file(file_path);
-        let co = compiler::compile_module(ast);
+        let co = compiler::compile_module(&ast);
+        
+        if verbose {
+            ast::pretty_print(&ast);
+            code_obj::dis(&co);
+        }
+        
         let vm = vm::VM {};
         vm.run(co);
     }

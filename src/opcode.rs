@@ -1,35 +1,41 @@
 #[repr(u8)]
-#[derive(Debug)]
+#[derive(PartialEq, Debug)]
+#[allow(non_camel_case_types)]
 pub enum OpCode {
     // Stack Manipulation
-    Push,
-    Pop,
-    Copy,
+    push,
+    pop,
+    copy,
 
     // Debug
-    Print,
+    print,
     
     // Control flow
-    JumpNonzero,
-    Halt,
+    jmp_nonzero,
+    halt,
 
     // Math operations
-    BinaryAdd,
-    BinarySub,
-    BinaryMul,
-    BinaryDiv,
+    add,
+    sub,
+    mul,
+    div,
 
     // Compare
-    BinaryGT, // >
-    BinaryLT, // <
-    BinaryET, // ==
-    BinaryNE, // !=
-    BinaryGE, // >=
-    BinaryLE, // <=
+    gt, // >
+    lt, // <
+    et, // ==
+    ne, // !=
+    ge, // >=
+    le, // <=
 }
+
 
 impl OpCode {
     pub fn from_u8(val: u8) -> Self {
         unsafe { std::mem::transmute(val)}
+    }
+    pub fn has_oparg(&self) -> bool {
+        let opcodes_with_oparg = vec![OpCode::push];
+        opcodes_with_oparg.contains(self)
     }
 }

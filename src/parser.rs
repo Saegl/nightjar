@@ -1,13 +1,14 @@
 use std::fs;
 
 use pest::{Parser, iterators::Pair};
+use pest::pratt_parser::PrattParser;
 use pest_derive::Parser;
+
+use crate::ast;
 
 #[derive(Parser)]
 #[grammar = "grammar/njar.pest"]
 pub struct Grammar;
-
-use pest::pratt_parser::PrattParser;
 
 
 lazy_static::lazy_static! {
@@ -28,61 +29,6 @@ lazy_static::lazy_static! {
             .op(Op::prefix(negative) | Op::prefix(bit_not))
             .op(Op::infix(exp, Left))
     };
-}
-
-pub mod ast {
-    #[derive(Debug)]
-    pub struct Module {
-        pub stmts: Vec<Stmt>,
-    }
-
-    #[derive(Debug)]
-    pub enum Stmt {
-        Expr(Expr),
-        FunDecl,
-    }
-
-    #[derive(Debug)]
-    pub enum Expr {
-        FunCall{name: String, args: Vec<Expr>},
-        Integer(i64),
-        String(String),
-        Unary{ op: UnaryOp, expr: Box<Expr>},
-        Binary { lhs: Box<Expr>, op: BinOp, rhs: Box<Expr> },
-    }
-
-    #[derive(Debug)]
-    pub enum UnaryOp {
-        Negative,
-        BitNot,
-        Not,
-    }
-
-    #[derive(Debug)]
-    pub enum BinOp {
-        Exp,
-        Mul,
-        MatMul,
-        Div,
-        Rem,
-        Add,
-        Sub,
-        LShift,
-        RShift,
-        BitAnd,
-        BitXor,
-        BitOr,
-        In,
-        NotIn,
-        Eq,
-        Ne,
-        Le,
-        Ge,
-        Lt,
-        Gt,
-        And,
-        Or,
-    }
 }
 
 
@@ -192,6 +138,5 @@ pub fn parse_file(path: &str) -> ast::Module {
     let source = fs::read_to_string(path).unwrap();
     let parse_tree = Grammar::parse(Rule::module, &source).unwrap().next().unwrap();
     let ast = parse_module(parse_tree);
-    println!("{:#?}", ast);
     ast
 }

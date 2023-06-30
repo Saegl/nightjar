@@ -14,21 +14,21 @@ impl VM {
             pc += 1;
 
             match opcode {
-                OpCode::Push => {
+                OpCode::push => {
                     let const_index = co.code[pc];
                     pc += 1;
                     stack.push(co.consts[const_index as usize].clone());
                 }
-                OpCode::Pop => {
+                OpCode::pop => {
                     stack.pop().unwrap();
                 },
-                OpCode::Copy => {
+                OpCode::copy => {
                     stack.push(stack[stack.len() - 1].clone());
                 }
-                OpCode::Print => {
+                OpCode::print => {
                     println!("{:?}", stack.pop().unwrap());
                 },
-                OpCode::JumpNonzero => {
+                OpCode::jmp_nonzero => {
                     let top = stack[stack.len() - 1].clone();
                     if top.__ne__(Value::Integer(0)).as_bool() {
                         let jump_position = co.code[pc];
@@ -37,55 +37,55 @@ impl VM {
                         pc += 1;
                     }
                 }
-                OpCode::Halt => {
+                OpCode::halt => {
                     break;
                 },
-                OpCode::BinaryAdd => {
+                OpCode::add => {
                     let b = stack.pop().unwrap();
                     let a = stack.pop().unwrap();
                     stack.push(a.__add__(b));
                 },
-                OpCode::BinarySub => {
+                OpCode::sub => {
                     let b = stack.pop().unwrap();
                     let a = stack.pop().unwrap();
                     stack.push(a.__sub__(b));
                 },
-                OpCode::BinaryMul => {
+                OpCode::mul => {
                     let b = stack.pop().unwrap();
                     let a = stack.pop().unwrap();
                     stack.push(a.__mul__(b));
                 },
-                OpCode::BinaryDiv => {
+                OpCode::div => {
                     let b = stack.pop().unwrap();
                     let a = stack.pop().unwrap();
                     stack.push(a.__div__(b));
                 },
-                OpCode::BinaryGT => {
+                OpCode::gt => {
                     let b = stack.pop().unwrap();
                     let a = stack.pop().unwrap();
                     stack.push(a.__gt__(b));
                 },
-                OpCode::BinaryLT => {
+                OpCode::lt => {
                     let b = stack.pop().unwrap();
                     let a = stack.pop().unwrap();
                     stack.push(a.__lt__(b));
                 },
-                OpCode::BinaryET => {
+                OpCode::et => {
                     let b = stack.pop().unwrap();
                     let a = stack.pop().unwrap();
                     stack.push(a.__et__(b));
                 },
-                OpCode::BinaryNE => {
+                OpCode::ne => {
                     let b = stack.pop().unwrap();
                     let a = stack.pop().unwrap();
                     stack.push(a.__ne__(b));
                 },
-                OpCode::BinaryGE => {
+                OpCode::ge => {
                     let b = stack.pop().unwrap();
                     let a = stack.pop().unwrap();
                     stack.push(a.__ge__(b));
                 },
-                OpCode::BinaryLE => {
+                OpCode::le => {
                     let b = stack.pop().unwrap();
                     let a = stack.pop().unwrap();
                     stack.push(a.__le__(b));
