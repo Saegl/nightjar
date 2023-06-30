@@ -91,6 +91,13 @@ fn compile_expr(cs: &mut CompilerState, expr: &ast::Expr) {
             cs.co.code.push(OpCode::push_const as u8);
             cs.co.code.push(const_index as u8);
         },
+        ast::Expr::String(s) => {
+            let value = Value::String(Box::new(s.clone()));
+            let const_index = cs.co.consts.len();
+            cs.co.consts.push(value);
+            cs.co.code.push(OpCode::push_const as u8);
+            cs.co.code.push(const_index as u8);
+        }
         ast::Expr::VarCall { name } => {
             cs.co.code.push(OpCode::push_var as u8);
             cs.co.code.push(cs.vartable.get(name));
