@@ -71,12 +71,16 @@ fn compile_expr(cs: &mut CompilerState, expr: &ast::Expr) {
             compile_expr(cs, &*lhs);
             compile_expr(cs, &*rhs);
             match op {
-                ast::BinOp::Add => {
-                    cs.co.code.push(OpCode::add as u8);
-                },
-                ast::BinOp::Mul => {
-                    cs.co.code.push(OpCode::mul as u8);
-                }
+                ast::BinOp::Add => cs.co.code.push(OpCode::add as u8),
+                ast::BinOp::Sub => cs.co.code.push(OpCode::sub as u8),
+                ast::BinOp::Mul => cs.co.code.push(OpCode::mul as u8),
+                ast::BinOp::Div => cs.co.code.push(OpCode::div as u8),
+                ast::BinOp::Eq => cs.co.code.push(OpCode::et as u8),
+                ast::BinOp::Ne => cs.co.code.push(OpCode::ne as u8),
+                ast::BinOp::Le => cs.co.code.push(OpCode::ne as u8),
+                ast::BinOp::Ge => cs.co.code.push(OpCode::ge as u8),
+                ast::BinOp::Lt => cs.co.code.push(OpCode::lt as u8),
+                ast::BinOp::Gt => cs.co.code.push(OpCode::gt as u8),
                 _ => unimplemented!(),
             }
         },
@@ -90,6 +94,16 @@ fn compile_expr(cs: &mut CompilerState, expr: &ast::Expr) {
         ast::Expr::VarCall { name } => {
             cs.co.code.push(OpCode::push_var as u8);
             cs.co.code.push(cs.vartable.get(name));
+        }
+        ast::Expr::FunCall { name, args } => {
+            if name != "print" || args.len() != 1 {
+                panic!("Only one function supported")
+            }
+
+            for arg in args {
+                compile_expr(cs, arg);
+            }
+            cs.co.code.push(OpCode::print as u8);
         }
         _ => unimplemented!(),
     }
